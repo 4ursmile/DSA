@@ -233,7 +233,8 @@ private:
                 return 1;
         return 0;
     }
-
+    // When delete we don't care about red case;
+    // We just care about black black case because rules of Red Black tree
     void HandleDoubleBlack(Node* root)
     {
         if (root == Root)
@@ -324,10 +325,11 @@ private:
             uReplace = vDelete->right;
         else 
             uReplace = NULL;
- 
+        // this bool to flag Black Black case;
         bool uvBlack = ((uReplace == NULL) || (uReplace->color == 0)) && (vDelete->color == 0);
         Node* parent = vDelete->parent;
         Node* sib = Sibling(vDelete);
+        //Went vDelete is Leaf, mean we can't find uReplace
         if (uReplace == NULL) {
             if (vDelete == Root) {
                 Root = NULL;
@@ -346,7 +348,7 @@ private:
             delete vDelete;
             return;
         }
- 
+        //case vDelete have one child
         if (vDelete->left == NULL || vDelete->right == NULL) {
             if (vDelete == Root) {
                 vDelete->data = uReplace->data;
@@ -354,6 +356,8 @@ private:
                 delete uReplace;            
             }
             else {
+                //Replace value of vDelete as value of uReplace
+                // Delete vDalete 
                 if (vDelete->parent->left == vDelete)
                     parent->left = uReplace;
                 else
@@ -361,6 +365,7 @@ private:
                 delete vDelete;
  
                 uReplace->parent = parent;
+                // if double black case solve it or uReplace->color = black;
                 if (uvBlack)
                     HandleDoubleBlack(uReplace);
                 else
@@ -372,6 +377,7 @@ private:
         int tmp = vDelete->data;
         vDelete->data = uReplace->data;
         uReplace->data =  tmp;
+        //Call Recusive to delete uReplace
         DeleteNode(uReplace);
     }
     
@@ -475,7 +481,7 @@ public:
     void DeleteTree() {
         Free(Root);
     }
-    void Print(int Delta = 0)
+    void Print()
     {
         _display_tree(Root);
     }
@@ -508,7 +514,7 @@ public:
         Node* vD = SearchNode(val);
         if (vD == NULL)
         {
-            cout << "Gia tri " << val <<" khong ton tai trong cay! \n";
+            cout << "Node " << val <<" doesn't exist in tree! \n";
             return;
         }
         cout << "Delete node " << val << " form tree! \n";
@@ -535,7 +541,7 @@ int main()
     RBTRee Tree(A, 21);
     Tree.Print();
     Tree.Delete(9);
-    Tree.Print(9);
+    Tree.Print();
     Tree.Delete(14);
     Tree.Delete(4);
     Tree.Print();
