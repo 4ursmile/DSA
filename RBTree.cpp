@@ -313,16 +313,68 @@ private:
             tmp = tmp->right;
         return tmp;
     }
-    void DeleteNode(Node* vD)
+    void DeleteNode(Node* vDelete)
     {
-        Node* uR;
-        if (vD->left != NULL && vD->right != NULL)
-            uR = MaxValueNode(vD->left);
-        else if (vD->left != NULL)
-            uR = vD->left;
-        else if (vD->right != NULL)
-            uR = vD->right;
+        Node* uReplace;
+        if ((vDelete->left != NULL) && (vDelete->right != NULL))
+            uReplace = MaxValueNode(vDelete->left);
+        else if (vDelete->left != NULL) 
+            uReplace = vDelete->left;
+        else if (vDelete->right != NULL) 
+            uReplace = vDelete->right;
+        else 
+            uReplace = NULL;
+ 
+        bool uvBlack = ((uReplace == NULL) || (uReplace->color == 0)) && (vDelete->color == 0);
+        Node* parent = vDelete->parent;
+        Node* sib = Sibling(vDelete);
+        if (uReplace == NULL) {
+            if (vDelete == Root) {
+                Root = NULL;
+            }
+            else {
+                if (uvBlack)
+                    HandleDoubleBlack(vDelete);
+                else if(sib != NULL)
+                    sib->color = 1;
+ 
+                if (vDelete->parent->left == vDelete)
+                    parent->left = NULL;
+                else
+                    parent->right = NULL;
+            }
+            delete vDelete;
+            return;
+        }
+ 
+        if (vDelete->left == NULL || vDelete->right == NULL) {
+            if (vDelete == Root) {
+                vDelete->data = uReplace->data;
+                vDelete->left = vDelete->right = NULL;
+                delete uReplace;            
+            }
+            else {
+                if (vDelete->parent->left == vDelete)
+                    parent->left = uReplace;
+                else
+                    parent->right = uReplace;
+                delete vDelete;
+ 
+                uReplace->parent = parent;
+                if (uvBlack)
+                    HandleDoubleBlack(uReplace);
+                else
+                    uReplace->color = 0;
+            }
+            return;
+        }
+        //swap value of u and v
+        int tmp = vDelete->data;
+        vDelete->data = uReplace->data;
+        uReplace->data =  tmp;
+        DeleteNode(uReplace);
     }
+    
     // print
     void PrintTree(Node* root, int space) {
         if (root == NULL)
@@ -436,6 +488,32 @@ public:
     {
         return RBTreeSearch(Root, val);
     }
+    Node* SearchNode(int val)
+    {
+        Node* tmp = Root;
+        while (tmp !=  NULL)
+        {
+            if (val < tmp->data)
+                tmp = tmp->left;
+            else if (val == tmp->data)
+                break;
+            else
+                tmp = tmp->right;
+        }
+        return tmp;
+        
+    }
+    void Delete(int val)
+    {
+        Node* vD = SearchNode(val);
+        if (vD == NULL)
+        {
+            cout << "Gia tri " << val <<" khong ton tai trong cay! \n";
+            return;
+        }
+        cout << "Delete node " << val << " form tree! \n";
+        DeleteNode(vD);
+    }
     void Insert(int val)
     {
         if (Root == NULL)
@@ -456,6 +534,10 @@ int main()
     int A[]{ -1,-2,3,4,5,6,7,8,9,0,1,-2,-6,4,5,6,20,30,50,46,22 };
     RBTRee Tree(A, 21);
     Tree.Print();
-    Tree.Inorder();
+    Tree.Delete(9);
+    Tree.Print(9);
+    Tree.Delete(14);
+    Tree.Delete(4);
+    Tree.Print();
     return 0;
 }
